@@ -1,0 +1,491 @@
+---
+title: "Predictive Mapping with R"
+subtitle: "Part III: Naive Bayesian"
+author: "Martin Hinz"
+date: "4.2.2019"
+output:
+  xaringan::moon_reader:
+    chakra: libs/remark-latest.min.js
+    css: ["default", "default-fonts", "customize.css"]
+    lib_dir: libs
+    nature:
+      beforeInit: "macros.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      fig_caption: yes
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+class: inverse, center, middle
+
+# Naive Bayesian
+
+---
+
+## Introducing Bayesian classifier
+
+.tiny[
+```{r}
+library(e1071)
+
+soiltype <- sample(c("Chernozem", "Brown soil"), size=20, replace=T)
+settlement_c <- sample(c(T,F), size=sum(soiltype=="Chernozem"), prob = c(0.8,0.2), replace=T)
+settlement_b <- sample(c(T,F), size=sum(soiltype=="Brown soil"), prob = c(0.2,0.8), replace=T)
+
+set_soil <- data.frame(soiltype = soiltype)
+set_soil$settlement[soiltype=="Chernozem"] <- settlement_c
+set_soil$settlement[soiltype=="Brown soil"] <- settlement_b
+```
+]
+
+.pull-left[
+.tiny[
+
+```{r}
+table(set_soil)
+
+prop.table(table(set_soil), margin = 2)
+```
+]]
+
+
+.pull-right[
+.tiny[
+
+```{r}
+naiveBayes(settlement ~ soiltype,
+           data = set_soil)
+```
+]]
+
+---
+
+## Introducing Bayesian classifier
+
+.tiny[
+```{r}
+bm <- naiveBayes(settlement ~ soiltype,
+                 data = set_soil)
+predict(bm, newdata = set_soil)
+
+predict(bm, newdata = set_soil, type = "raw")
+```
+]
+
+---
+## Introducing Bayesian classifier
+
+Add another predictor
+
+.tiny[
+```{r}
+aspect_s <- sample(c("N","S"), size=sum(set_soil$settlement), prob = c(0.8,0.2), replace=T)
+aspect_n <- sample(c("N","S"), size=sum(!set_soil$settlement), prob = c(0.2,0.8), replace=T)
+
+set_soil$aspect[set_soil$settlement] <- aspect_s
+set_soil$aspect[!set_soil$settlement] <- aspect_n
+```
+]
+
+.tiny[
+```{r}
+bm <- naiveBayes(settlement ~ soiltype + aspect,
+                 data = set_soil)
+bm
+```
+]
+
+---
+## Introducing Bayesian classifier
+
+resulting combined probabilities
+.tiny[
+```{r}
+cbind(predict(bm, newdata = set_soil, type = "raw"), as.character(set_soil$soiltype), set_soil$aspect)
+```
+]
+
+---
+## Resetting the stage
+.tiny[
+Loading Libraries
+```{r}
+library(sp)
+library(raster)
+library(mapview)
+```
+
+Reading Data
+```{r}
+load("pred_data2.RData")
+source("model_gain.R")
+evidence$aspect <- factor(evidence$aspect)
+evidence$site_b <- factor(evidence$site)
+
+env_data.df <- as.data.frame(env_data)
+env_data.df$aspect <- factor(env_data.df$aspect)
+```
+]
+
+---
+## Doing the calculation
+
+```{r}
+fit.bayes <- naiveBayes(site_b ~ tpi + slope + aspect,
+                        data=evidence)
+```
+
+Model description (trivial):
+
+If something is a site depends on the tpi, the slope and the aspect (as factor). We use our evidence.
+
+---
+## Resulting Model
+.tiny[
+```{r}
+fit.bayes
+```
+]
+---
+## Repredicting our evidence
+
+.tiny[
+.pull-left[
+```{r}
+pcdata.bayes.raw <- predict(fit.bayes,
+                            newdata = evidence,
+                            type="raw")#<<
+
+pcdata.bayes.raw
+```
+]
+.pull-right[
+```{r}
+pcdata.bayes.class <- predict(fit.bayes,
+                              newdata = evidence,
+                              type="class")#<<
+
+pcdata.bayes.class
+```
+]
+]
+---
+## Repredicting our evidence
+.tiny[
+.center[
+```{r, out.height="200px"}
+boxplot(pcdata.bayes.raw)
+```
+]
+.pull-left[
+```{r, out.height="200px"}
+boxplot(pcdata.bayes.raw[evidence$site,])
+```
+]
+.pull-right[
+```{r, out.height="200px"}
+boxplot(pcdata.bayes.raw[!evidence$site,])
+```
+]
+]
+---
+## Repredicting our evidence cont.
+.tiny[
+.center[
+```{r}
+boxplot(pcdata.bayes.raw[,2] ~ evidence$site)
+```
+]
+]
+---
+
+## Checking the prediction
+
+```{r}
+comp <- data.frame(pcdata.bayes.class,evidence$site)
+table(comp)
+```
+
+---
+
+## Separation
+
+Same setting as before
+.pull-left[
+.tiny[
+```{r}
+
+t1 <- min(pcdata.bayes.raw[evidence$site,2])
+t2 <- quantile(
+  pcdata.bayes.raw[evidence$site,2],
+  prob = 0.05)
+
+```
+]
+]
+
+.pull-right[
+```{r, echo=FALSE}
+boxplot(pcdata.bayes.raw[,2] ~ evidence$site)
+
+abline(h=c(t1, t2), col="red")
+text(y=c(t1, t2),x=1.5,
+     labels = c("t1", "t2"))
+```
+]
+
+---
+## Separation applied and mapped
+.tiny[
+```{r, out.width="100%", fig.height=4}
+source("predict_prob_classes.R")
+
+pdata_class.bayes <- predict_prob_classes(my_model = fit.bayes,
+                                        my_env_data = env_data.df,
+                                        my_evidence = evidence,
+                                        probs = c(0,0.05))
+
+# Because Bayes predicts for NA values!
+pdata_class.bayes[is.na(env_data.df$tpi)]<-NA
+
+# adding the predicted data as new layer
+x_pred$pred_class.bayes <- pdata_class.bayes
+# Display the map
+mapview(x_pred$pred_class.bayes) + sites
+```
+]
+
+---
+
+## Caculating Gain
+
+```{r}
+bayes_gain <- model_gain(x_pred$pred_class.bayes,sites)
+
+bayes_gain
+```
+
+---
+
+### Overfitting
+
+Our initial example, with much less data
+
+```{r}
+# random sampling distances
+
+distance <- sort(sample(0:7000, size = 10))
+
+# the altitude depends on the distance
+altitude <- 558 + distance/7000*2362 +
+  rnorm(n = length(distance), mean = 0, sd = 100)
+
+plot(altitude ~ distance)
+```
+
+---
+
+```{r, echo=F}
+par(mfrow=c(2,2))
+
+m1 <- lm(altitude ~ distance)
+m2 <- lm(altitude ~ poly(distance,2))
+m3 <- lm(altitude ~ poly(distance,4))
+m4 <- lm(altitude ~ poly(distance,8))
+
+plot(altitude ~ distance)
+lines(predict(m1) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m2) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m3) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m4) ~ distance)
+
+par(mfrow=c(1,1))
+
+```
+
+---
+
+```{r, echo=F}
+summary(m1)$r.squared
+summary(m2)$r.squared
+summary(m3)$r.squared
+summary(m4)$r.squared
+```
+
+---
+
+```{r, echo=F}
+
+slope <- data.frame(dist = distance,
+                    alt = altitude)
+
+train_ratio <- 0.5
+
+train_selector <- sample(1:nrow(slope), round(nrow(slope) * train_ratio))
+
+
+train <- slope[train_selector,]
+test <- slope[!(1:nrow(slope)  %in% train_selector),]
+```
+
+---
+
+```{r, echo=F}
+m1 <- lm(alt~dist, data = train)
+
+plot(slope, type = "n")
+points(train)
+points(test, col="red")
+abline(m1)
+
+```
+
+---
+
+
+```{r, echo=F}
+
+newdata <- data.frame(dist=1000:6000)
+
+m2 <- lm(alt~poly(dist,2), data = train)
+m3 <- lm(alt~poly(dist,4), data = train)
+
+plot(slope, type = "n")
+points(train)
+points(test, col="red")
+lines(newdata$dist, predict(m2, newdata))
+plot(slope, type = "n")
+points(train)
+points(test, col="red")
+lines(newdata$dist, predict(m3, newdata))
+```
+
+---
+
+```{r, echo=F}
+
+cor(train$alt, predict(m1, newdata = train))^2
+cor(train$alt, predict(m2, newdata = train))^2
+cor(train$alt, predict(m3, newdata = train))^2
+
+```
+
+```{r, echo=F}
+
+cor(test$alt, predict(m1, newdata = test))^2
+cor(test$alt, predict(m2, newdata = test))^2
+cor(test$alt, predict(m3, newdata = test))^2
+
+```
+
+---
+
+```{r, echo=F}
+
+train_ratio <- 0.5
+
+train_selector <- sample(1:nrow(evidence), round(nrow(evidence) * train_ratio))
+
+evidence.train <- evidence[train_selector,]
+evidence.test <- evidence[!(1:nrow(evidence)  %in% train_selector),]
+```
+
+---
+
+```{r, echo=F}
+
+fit <- glm(site ~ tpi + slope + factor(aspect),
+           data=evidence.train,
+           family=binomial())
+
+pcdata.train <- predict(fit, type="response")
+
+comp <- data.frame(pred = pcdata.train>0.1,
+                   orig = evidence.train$site)
+
+table(comp)
+
+correct <- sum(diag(table(comp)))
+correct / sum(table(comp))
+
+pcdata.test <- predict(fit, newdata = evidence.test, type="response")
+
+comp <- data.frame(pred = pcdata.test>0.1,
+                   orig = evidence.test$site)
+
+table(comp)
+
+correct <- sum(diag(table(comp)))
+correct / sum(table(comp))
+
+```
+
+---
+
+```{r, echo=F}
+
+library(mfp)
+fit <- mfp(site ~ fp(tpi) + fp(slope) + as.factor(aspect),
+               data = evidence.train, family=binomial)
+
+pcdata.train <- predict(fit, type="response")
+
+comp <- data.frame(pred = pcdata.train>0.1,
+                   orig = evidence.train$site)
+
+table(comp)
+
+correct <- sum(diag(table(comp)))
+correct / sum(table(comp))
+
+pcdata.test <- predict(fit, newdata = evidence.test, type="response")
+
+comp <- data.frame(pred = pcdata.test>0.1,
+                   orig = evidence.test$site)
+
+table(comp)
+
+correct <- sum(diag(table(comp)))
+correct / sum(table(comp))
+
+```
+
+---
+
+```{r, echo=F}
+
+library(e1071)
+fit.bayes <- naiveBayes(site_b ~ tpi + slope + aspect,
+                        data=evidence.train)
+
+pcdata.train <- predict(fit.bayes, newdata = evidence.train, type="raw")
+
+comp <- data.frame(pred = pcdata.train[,2]>0.5,
+                   orig = evidence.train$site)
+
+table(comp)
+
+correct <- sum(diag(table(comp)))
+correct / sum(table(comp))
+
+pcdata.test <- predict(fit.bayes, newdata = evidence.test, type="raw")
+
+comp <- data.frame(pred = pcdata.test[,2]>0.5,
+                   orig = evidence.test$site)
+
+table(comp)
+
+correct <- sum(diag(table(comp)))
+correct / sum(table(comp))
+
+```
+

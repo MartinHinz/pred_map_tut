@@ -1,0 +1,15 @@
+.caption {
+  text-align: right;
+  font-size: .8rem;
+  font-style: italic;
+}
+
+.green { color: green; }
+.red { color: red; }
+.smaller { font-size: 90% }
+.small { font-size: 75% }
+.tiny { font-size: 60% }
+
+.smaller .remark-code, .small .remark-code, .tiny .remark-code {
+  font-size: inherit;
+}

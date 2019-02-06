@@ -1,0 +1,12 @@
+base
+mapview
+sp
+raster
+magrittr
+c14bazAAR
+bindrcpp
+sf
+ggplot2
+ggmap
+survival
+mfp
