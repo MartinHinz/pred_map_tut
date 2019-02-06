@@ -277,6 +277,9 @@ bayes_gain
 
 Our initial example, with much less data
 
+.pull-left[
+.tiny[
+
 ```{r}
 # random sampling distances
 
@@ -284,20 +287,74 @@ distance <- sort(sample(0:7000, size = 10))
 
 # the altitude depends on the distance
 altitude <- 558 + distance/7000*2362 +
-  rnorm(n = length(distance), mean = 0, sd = 100)
+  rnorm(n = length(distance),
+        mean = 0,
+        sd = 100)
 
-plot(altitude ~ distance)
 ```
 
+]
+]
+
+.pull-right[
+```{r}
+plot(altitude ~ distance)
+```
+]
 ---
+## Modeling with polynomes
 
-```{r, echo=F}
-par(mfrow=c(2,2))
+.pull-left[
+.tiny[
 
+```{r}
 m1 <- lm(altitude ~ distance)
 m2 <- lm(altitude ~ poly(distance,2))
 m3 <- lm(altitude ~ poly(distance,4))
 m4 <- lm(altitude ~ poly(distance,8))
+```
+
+```{r, eval=F}
+par(mfrow=c(2,2))
+
+plot(altitude ~ distance)
+lines(predict(m1) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m2) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m3) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m4) ~ distance)
+
+par(mfrow=c(1,1))
+```
+]]
+
+.pull-right[
+.tiny[
+```{r echo=F}
+
+par(mfrow=c(2,2))
+
+plot(altitude ~ distance)
+lines(predict(m1) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m2) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m3) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m4) ~ distance)
+
+par(mfrow=c(1,1))
+
+```
+
+]]
+
+---
+```{r echo=F}
+
+par(mfrow=c(2,2))
 
 plot(altitude ~ distance)
 lines(predict(m1) ~ distance)
@@ -313,24 +370,53 @@ par(mfrow=c(1,1))
 ```
 
 ---
+## comparing the predictive power
 
-```{r, echo=F}
+.pull-left[
+.tiny[
+```{r}
 summary(m1)$r.squared
 summary(m2)$r.squared
 summary(m3)$r.squared
 summary(m4)$r.squared
 ```
+]]
 
+.pull-right[
+.tiny[
+```{r echo=F}
+
+par(mfrow=c(2,2))
+
+plot(altitude ~ distance)
+lines(predict(m1) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m2) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m3) ~ distance)
+plot(altitude ~ distance)
+lines(predict(m4) ~ distance)
+
+par(mfrow=c(1,1))
+
+```
+
+]]
+
+Is this good?
 ---
 
-```{r, echo=F}
+### Dividing evidence into training and test
+
+```{r}
 
 slope <- data.frame(dist = distance,
                     alt = altitude)
 
 train_ratio <- 0.5
 
-train_selector <- sample(1:nrow(slope), round(nrow(slope) * train_ratio))
+train_selector <- sample(1:nrow(slope),
+                         round(nrow(slope) * train_ratio))
 
 
 train <- slope[train_selector,]
@@ -338,8 +424,10 @@ test <- slope[!(1:nrow(slope)  %in% train_selector),]
 ```
 
 ---
+### linear model, test and training
 
-```{r, echo=F}
+.tiny[
+```{r}
 m1 <- lm(alt~dist, data = train)
 
 plot(slope, type = "n")
@@ -348,60 +436,94 @@ points(test, col="red")
 abline(m1)
 
 ```
+]
 
 ---
 
+### polynomial model, test and training
 
-```{r, echo=F}
+.pull-left[
+.tiny[
+```{r}
 
 newdata <- data.frame(dist=1000:6000)
 
 m2 <- lm(alt~poly(dist,2), data = train)
-m3 <- lm(alt~poly(dist,4), data = train)
 
 plot(slope, type = "n")
 points(train)
 points(test, col="red")
 lines(newdata$dist, predict(m2, newdata))
+
+```
+
+]
+]
+
+.pull-right[
+.tiny[
+```{r}
+m3 <- lm(alt~poly(dist,4), data = train)
+
 plot(slope, type = "n")
 points(train)
 points(test, col="red")
 lines(newdata$dist, predict(m3, newdata))
 ```
 
----
-
-```{r, echo=F}
-
-cor(train$alt, predict(m1, newdata = train))^2
-cor(train$alt, predict(m2, newdata = train))^2
-cor(train$alt, predict(m3, newdata = train))^2
-
-```
-
-```{r, echo=F}
-
-cor(test$alt, predict(m1, newdata = test))^2
-cor(test$alt, predict(m2, newdata = test))^2
-cor(test$alt, predict(m3, newdata = test))^2
-
-```
+]
+]
 
 ---
 
-```{r, echo=F}
+.pull-left[
+.tiny[
+```{r}
+
+cor(train$alt,
+    predict(m1, newdata = train))^2
+cor(train$alt,
+    predict(m2, newdata = train))^2
+cor(train$alt,
+    predict(m3, newdata = train))^2
+
+```
+]
+]
+
+.pull-right[
+.tiny[
+```{r}
+
+cor(test$alt,
+    predict(m1, newdata = test))^2
+cor(test$alt,
+    predict(m2, newdata = test))^2
+cor(test$alt,
+    predict(m3, newdata = test))^2
+
+```
+]
+]
+---
+
+### applying training/test split to our real data
+
+.tiny[
+```{r}
 
 train_ratio <- 0.5
 
-train_selector <- sample(1:nrow(evidence), round(nrow(evidence) * train_ratio))
+train_selector <- sample(1:nrow(evidence),
+                         round(nrow(evidence) * train_ratio))
 
 evidence.train <- evidence[train_selector,]
 evidence.test <- evidence[!(1:nrow(evidence)  %in% train_selector),]
 ```
-
+]
 ---
 
-```{r, echo=F}
+```{r}
 
 fit <- glm(site ~ tpi + slope + factor(aspect),
            data=evidence.train,
@@ -431,7 +553,7 @@ correct / sum(table(comp))
 
 ---
 
-```{r, echo=F}
+```{r, echo=F, warning=F}
 
 library(mfp)
 fit <- mfp(site ~ fp(tpi) + fp(slope) + as.factor(aspect),
