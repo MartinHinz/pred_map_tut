@@ -20,6 +20,8 @@ editor_options:
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(fig.path='presentation_files/presentation3/')
 ```
 
 class: inverse, center, middle

@@ -16,6 +16,8 @@ output:
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(fig.path='presentation_files/presentation1/')
 ```
 
 class: inverse, center, middle
