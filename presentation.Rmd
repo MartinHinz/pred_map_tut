@@ -303,7 +303,7 @@ Possible options:
 .pull-right[
 ```{r, echo=FALSE, out.width = "100%", fig.height = 4, cache=TRUE}
 library(raster)
-switzerland <- getData('alt', country='CHE', level=0)
+switzerland <- getData('alt', country='CHE', level=0, path = "data/")
 random <- sampleRandom(switzerland, 100, xy=TRUE, sp=TRUE)
 
 mapview(random)
@@ -462,7 +462,7 @@ The raster package holds a convenient function for getting spatial data: `getDat
 .small[
 ```{r}
 
-dem_raster <- raster::getData(name = "alt", country='CHE')
+dem_raster <- raster::getData(name = "alt", country='CHE', path = "data/")
 dem_raster
 
 ```
