@@ -1,0 +1,53 @@
+---
+title: "Predictive Mapping in R"
+subtitle: "Tutorial Workshop given at the International Colloquium on Digital Archaeology in Bern"
+author: "Martin Hinz"
+date: "8 Februar 2019"
+output:
+  xaringan::moon_reader:
+    keep_md: true
+    chakra: libs/remark-latest.min.js
+    css: ["default", "default-fonts", "libs/customize.css"]
+    lib_dir: libs
+    seal: false
+    nature:
+      beforeInit: "libs/macros.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      fig_caption: yes
+---
+
+class: title-slide, center, middle, inverse
+```{r, echo = FALSE}
+# https://stackoverflow.com/questions/25646333/code-chunk-font-size-in-rmarkdown-with-knitr-and-latex
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+```
+
+```{r, echo = FALSE, results="asis"}
+cat('# ', rmarkdown::metadata$title)
+```
+
+```{r, echo = FALSE, results="asis"}
+cat('## ', rmarkdown::metadata$subtitle)
+```
+
+```{r, echo = FALSE, results="asis"}
+cat('### ', rmarkdown::metadata$author)
+```
+
+```{r, echo = FALSE, results="asis"}
+cat('#### ', rmarkdown::metadata$institute)
+```
+
+```{r, echo = FALSE, results="asis"}
+cat(rmarkdown::metadata$date)
+```
+
+[Part I](presentation1.html) | 
+[Part II](presentation2.html) | 
+[Part III](presentation3.html)

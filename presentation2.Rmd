@@ -2,9 +2,10 @@
 title: "Predictive Mapping with R"
 subtitle: "Part II: GLM + Gain"
 author: "Martin Hinz"
-date: "4.2.2019"
+date: "6.2.2019"
 output:
   xaringan::moon_reader:
+    keep_md: true
     chakra: libs/remark-latest.min.js
     css: ["default", "default-fonts", "libs/customize.css"]
     lib_dir: libs
