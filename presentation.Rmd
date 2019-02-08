@@ -5,7 +5,7 @@ author: "Martin Hinz"
 date: "4.2.2019"
 output:
   xaringan::moon_reader:
-    css: ["default", "default-fonts", "customize.css"]
+    css: ["default", "default-fonts", "libs/customize.css"]
     lib_dir: libs
     nature:
       highlightStyle: github

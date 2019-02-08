@@ -6,7 +6,7 @@ date: "4.2.2019"
 output:
   xaringan::moon_reader:
     chakra: libs/remark-latest.min.js
-    css: ["default", "default-fonts", "customize.css"]
+    css: ["default", "default-fonts", "libs/customize.css"]
     lib_dir: libs
     nature:
       beforeInit: "libs/macros.js"
