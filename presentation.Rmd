@@ -651,5 +651,5 @@ summary(sites)
 ## Save the data for later use
 
 ```{r cache=TRUE}
-save(sites, nonsites, env_data, file="pred_data.RData")
+save(sites, nonsites, env_data, file="data/pred_data.RData")
 ```

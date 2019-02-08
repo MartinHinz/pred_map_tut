@@ -123,7 +123,7 @@ library(mapview)
 
 Reading Data
 ```{r}
-load("pred_data2.RData")
+load("data/pred_data2.RData")
 source("model_gain.R")
 evidence$aspect <- factor(evidence$aspect)
 evidence$site_b <- factor(evidence$site)

@@ -432,7 +432,7 @@ library(mapview)
 
 Reading Data
 ```{r}
-load("pred_data.RData")
+load("data/pred_data.RData")
 ```
 
 ---
@@ -1096,5 +1096,5 @@ save(sites,
      evidence,
      env_data.df,
      x_pred,
-     file="pred_data2.RData")
+     file="data/pred_data2.RData")
 ```
