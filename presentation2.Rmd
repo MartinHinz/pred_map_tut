@@ -1089,7 +1089,7 @@ ps
 ---
 ## Save the data for later use
 
-```{r cache=TRUE}
+```{r}
 save(sites,
      nonsites,
      env_data,
