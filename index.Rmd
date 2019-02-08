@@ -2,6 +2,7 @@
 title: "Predictive Mapping in R"
 subtitle: "Tutorial Workshop given at the International Colloquium on Digital Archaeology in Bern"
 author: "Martin Hinz"
+institute: "Institut für Archäologische Wissenschaften, Universität Bern"
 date: "8 Februar 2019"
 output:
   xaringan::moon_reader:
@@ -50,4 +51,10 @@ cat(rmarkdown::metadata$date)
 
 [Part I](presentation1.html) | 
 [Part II](presentation2.html) | 
-[Part III](presentation3.html)
+[Part III](presentation3.html) <sup>\*</sup>
+
+.footnote[
+.small[
+<sup>\*</sup> You can find the code of this presentations at the [github repository](https://github.com/MartinHinz/pred_map_tut).
+]
+]
