@@ -126,7 +126,7 @@ library(mapview)
 Reading Data
 ```{r}
 load("data/pred_data2.RData")
-source("model_gain.R")
+source("scripts/model_gain.R")
 evidence$aspect <- factor(evidence$aspect)
 evidence$site_b <- factor(evidence$site)
 
@@ -246,7 +246,7 @@ text(y=c(t1, t2),x=1.5,
 ## Separation applied and mapped
 .tiny[
 ```{r, out.width="100%", fig.height=4}
-source("predict_prob_classes.R")
+source("scripts/predict_prob_classes.R")
 
 pdata_class.bayes <- predict_prob_classes(my_model = fit.bayes,
                                         my_env_data = env_data.df,

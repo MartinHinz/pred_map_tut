@@ -745,7 +745,7 @@ mapview(x_pred$pred_class) + sites
 ## Interlude: Function for prediction of Probability Classes
 
 ```{r, fig.dim=c(5,5)}
-source("predict_prob_classes.R")
+source("scripts/predict_prob_classes.R")
 
 test <- predict_prob_classes(my_model = fit, my_env_data = env_data.df, my_evidence = evidence, probs = c(0,0.05))
 
@@ -884,7 +884,7 @@ Remember: Gain ranges from 0 (all area, or no site predicted) to (theoretically)
 
 ```{r}
 
-source("model_gain.R")
+source("scripts/model_gain.R")
 
 model_gain(x_pred$pred_class, sites)
 g
@@ -1036,7 +1036,7 @@ boxplot(pcdata ~ evidence$site)
 ## Prediction > Separation > Mapping
 .tiny[
 ```{r, message=F, warning=F}
-source("predict_prob_classes.R")
+source("scripts/predict_prob_classes.R")
 
 pdata_class.mfp <- predict_prob_classes(my_model = mfp_fit,
                                         my_env_data = env_data.df,
